@@ -17,6 +17,12 @@ interface FormErrors {
   password?: string
 }
 
+interface EmailStatus {
+  sent: boolean
+  previewUrl?: string | null
+  error?: string | null
+}
+
 function App() {
   const [formData, setFormData] = useState<FormData>({
     nombre: '',
@@ -32,6 +38,13 @@ function App() {
   const [isRegistered, setIsRegistered] = useState(false)
   const [registeredUser, setRegisteredUser] = useState<FormData | null>(null)
   const [serverError, setServerError] = useState<string | null>(null)
+  const [emailStatus, setEmailStatus] = useState<EmailStatus | null>(null)
+  const [isResending, setIsResending] = useState(false)
+  const [resendStatus, setResendStatus] = useState<{
+    success: boolean
+    message: string
+    previewUrl?: string | null
+  } | null>(null)
 
   // Calculate password strength
   const getPasswordStrength = (pass: string) => {
@@ -146,6 +159,10 @@ function App() {
         throw new Error(data?.error || data?.message || 'Error al registrar el usuario')
       }
 
+      setEmailStatus({
+        sent: Boolean(data?.emailSent),
+        previewUrl: data?.emailPreview || null,
+      })
       setRegisteredUser({ ...formData })
       setIsRegistered(true)
     } catch (err: unknown) {
@@ -155,6 +172,48 @@ function App() {
       setServerError(errorMessage)
     } finally {
       setIsSubmitting(false)
+    }
+  }
+
+  const handleResendEmail = async () => {
+    if (!registeredUser) return
+
+    setIsResending(true)
+    setResendStatus(null)
+
+    try {
+      const response = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          to: registeredUser.email,
+          name: registeredUser.nombre,
+          secondName: registeredUser.apellidos,
+          type: 'welcome',
+        }),
+      })
+
+      const data = await response.json().catch(() => null)
+
+      if (!response.ok) {
+        throw new Error(data?.error || 'Error al reenviar el correo')
+      }
+
+      setResendStatus({
+        success: true,
+        message: '¡Correo reenviado exitosamente!',
+        previewUrl: data?.previewUrl || null,
+      })
+    } catch (err: unknown) {
+      console.error('Error al reenviar correo:', err)
+      setResendStatus({
+        success: false,
+        message: err instanceof Error ? err.message : 'No se pudo reenviar el correo',
+      })
+    } finally {
+      setIsResending(false)
     }
   }
 
@@ -171,6 +230,8 @@ function App() {
     setShowPassword(false)
     setIsRegistered(false)
     setRegisteredUser(null)
+    setEmailStatus(null)
+    setResendStatus(null)
   }
 
   return (
@@ -451,7 +512,6 @@ function App() {
             </form>
           </>
         ) : (
-          /* Confirmation / Success State */
           <div className="success-card">
             <div className="success-icon-wrapper">
               <div className="success-icon-bg" />
@@ -462,7 +522,7 @@ function App() {
 
             <h2 className="success-title">¡Registro Exitoso!</h2>
 
-            {/* Notification Banner */}
+            {/* Notification Banner with Email Status */}
             <div className="validation-notice-banner">
               <div className="notice-icon">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -470,11 +530,58 @@ function App() {
                   <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
                 </svg>
               </div>
-              <p className="notice-text">
-                <strong>Te estaremos enviando un correo de validación de tu cuenta</strong> a{' '}
-                <span className="notice-highlight">{registeredUser?.email}</span>. Por favor revisa tu bandeja de entrada o spam para activar tu usuario.
-              </p>
+              <div className="notice-content">
+                <p className="notice-text">
+                  {emailStatus?.sent ? (
+                    <>
+                      <strong>¡Hemos enviado un correo de validación y bienvenida</strong> a{' '}
+                      <span className="notice-highlight">{registeredUser?.email}</span>! Por favor revisa tu bandeja de entrada o spam para activar tu usuario.
+                    </>
+                  ) : (
+                    <>
+                      <strong>Usuario registrado correctamente.</strong> Te estaremos enviando un correo de validación a{' '}
+                      <span className="notice-highlight">{registeredUser?.email}</span>.
+                    </>
+                  )}
+                </p>
+
+                {/* Email Preview Link if available (e.g. in test/dev mode with Ethereal) */}
+                {(emailStatus?.previewUrl || resendStatus?.previewUrl) && (
+                  <div className="email-preview-action">
+                    <a
+                      href={resendStatus?.previewUrl || emailStatus?.previewUrl || '#'}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn-preview-link"
+                    >
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+                        <circle cx="12" cy="12" r="3" />
+                      </svg>
+                      <span>Ver correo de prueba (Ethereal Preview) ↗</span>
+                    </a>
+                  </div>
+                )}
+              </div>
             </div>
+
+            {/* Resend Status Banner */}
+            {resendStatus && (
+              <div className={`resend-feedback-banner ${resendStatus.success ? 'is-success' : 'is-error'}`}>
+                {resendStatus.success ? (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                ) : (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="12" y1="8" x2="12" y2="12" />
+                    <line x1="12" y1="16" x2="12.01" y2="16" />
+                  </svg>
+                )}
+                <span>{resendStatus.message}</span>
+              </div>
+            )}
 
             {/* User Data Summary */}
             <div className="user-summary-box">
@@ -493,18 +600,49 @@ function App() {
                 <span className="summary-label">Edad:</span>
                 <span className="summary-value">{registeredUser?.edad} años</span>
               </div>
+              <div className="summary-row">
+                <span className="summary-label">Estado de correo:</span>
+                <span className="summary-value email-status-tag">
+                  {emailStatus?.sent ? '✓ Enviado' : '⏳ Pendiente'}
+                </span>
+              </div>
             </div>
 
-            {/* Reset / Register Another Button */}
-            <button type="button" className="btn-reset" onClick={handleReset}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
-                <path d="M21 3v5h-5" />
-                <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
-                <path d="M8 16H3v5" />
-              </svg>
-              <span>Registrar a otro usuario</span>
-            </button>
+            {/* Actions */}
+            <div className="success-actions">
+              <button
+                type="button"
+                className="btn-resend-email"
+                onClick={handleResendEmail}
+                disabled={isResending}
+              >
+                {isResending ? (
+                  <>
+                    <span className="spinner" />
+                    <span>Reenviando correo...</span>
+                  </>
+                ) : (
+                  <>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect width="20" height="16" x="2" y="4" rx="2" />
+                      <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+                    </svg>
+                    <span>Reenviar correo de validación</span>
+                  </>
+                )}
+              </button>
+
+              {/* Reset / Register Another Button */}
+              <button type="button" className="btn-reset" onClick={handleReset}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+                  <path d="M21 3v5h-5" />
+                  <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+                  <path d="M8 16H3v5" />
+                </svg>
+                <span>Registrar a otro usuario</span>
+              </button>
+            </div>
           </div>
         )}
       </div>
