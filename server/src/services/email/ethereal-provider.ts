@@ -1,6 +1,5 @@
 import nodemailer from "nodemailer";
-import { EmailProvider, EmailResult, SendEmailOptions } from "../email-provider.interface";
-
+import type { EmailProvider, EmailResult, SendEmailOptions } from "./email-provider.interface.js";
 
 export class EtherealProvider implements EmailProvider {
   private transporterPromise: Promise<nodemailer.Transporter> | null = null;
@@ -15,10 +14,7 @@ export class EtherealProvider implements EmailProvider {
           host: testAccount.smtp.host,
           port: testAccount.smtp.port,
           secure: testAccount.smtp.secure,
-          auth: {
-            user: testAccount.user,
-            pass: testAccount.pass,
-          },
+          auth: { user: testAccount.user, pass: testAccount.pass },
         });
         console.log(`[EtherealProvider] Cuenta de prueba lista (${testAccount.user})`);
         return transporter;
@@ -42,15 +38,9 @@ export class EtherealProvider implements EmailProvider {
 
       const previewUrl = nodemailer.getTestMessageUrl(info);
       console.log(`[EtherealProvider] Correo enviado a: ${options.to} (ID: ${info.messageId})`);
-      if (previewUrl) {
-        console.log(`[EtherealProvider] Vista previa: ${previewUrl}`);
-      }
+      if (previewUrl) console.log(`[EtherealProvider] Vista previa: ${previewUrl}`);
 
-      return {
-        success: true,
-        messageId: info.messageId,
-        previewUrl,
-      };
+      return { success: true, messageId: info.messageId, previewUrl };
     } catch (error) {
       console.error("[EtherealProvider] Error al enviar correo:", error);
       return {

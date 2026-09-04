@@ -1,5 +1,5 @@
 import nodemailer from "nodemailer";
-import { EmailProvider, EmailResult, SendEmailOptions } from "../email-provider.interface";
+import type { EmailProvider, EmailResult, SendEmailOptions } from "./email-provider.interface.js";
 
 export interface SmtpConfig {
   host: string;
@@ -9,10 +9,6 @@ export interface SmtpConfig {
   pass: string;
 }
 
-/**
- * Proveedor de producción: envía correos vía un servidor SMTP
- * (Gmail, un host propio, etc.) usando nodemailer.
- */
 export class SmtpProvider implements EmailProvider {
   private transporter: nodemailer.Transporter;
 
