@@ -7,6 +7,7 @@ export interface RegisterUserResult {
   user: User;
   verificationSent: boolean;
   verificationMessage?: string;
+  previewUrl?: string | null;
 }
 
 export class RegisterUserUseCase {
@@ -20,7 +21,8 @@ export class RegisterUserUseCase {
         return {
             user,
             verificationSent: validation.success,
-            ...(validation.message ? { verificationMessage: validation.message } : {})
+            ...(validation.message ? { verificationMessage: validation.message } : {}),
+            ...(validation.previewUrl ? { previewUrl: validation.previewUrl } : {}),
         };
     }
 }

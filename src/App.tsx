@@ -160,8 +160,8 @@ function App() {
       }
 
       setEmailStatus({
-        sent: Boolean(data?.emailSent),
-        previewUrl: data?.emailPreview || null,
+        sent: Boolean(data?.verificationSent ?? data?.emailSent),
+        previewUrl: data?.previewUrl || data?.emailPreview || null,
       })
       setRegisteredUser({ ...formData })
       setIsRegistered(true)

@@ -33,7 +33,11 @@ export class EmailUserValidator implements UserValidator {
       return { success: false, message: result.error || "No se pudo enviar el correo de verificación" };
     }
 
-    return { success: true, message: "Correo de verificación enviado" };
+    return {
+      success: true,
+      message: "Correo de verificación enviado",
+      previewUrl: result.previewUrl ? result.previewUrl : null,
+    };
   }
 
   confirmToken(token: string): ValidationResult {
