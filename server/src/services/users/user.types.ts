@@ -5,6 +5,7 @@ export interface User {
     secondName: string;
     age: number;
     password: string;
+    phone?: string;
 
 }
 
@@ -14,6 +15,7 @@ export interface CreateUserInput{
     secondName: string
     age: number;
     password: string;
+    phone?: string;
 }
 
 export type UpdateUserInput = Partial<CreateUserInput>;

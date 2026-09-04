@@ -8,6 +8,13 @@
       "when": 1787769464697,
       "tag": "0000_legal_tomas",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1788528716740,
+      "tag": "0001_lying_firebrand",
+      "breakpoints": true
     }
   ]
 }

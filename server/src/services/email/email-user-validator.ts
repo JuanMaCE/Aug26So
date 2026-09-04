@@ -17,7 +17,7 @@ export class EmailUserValidator implements UserValidator {
   async validate(user: User): Promise<ValidationResult> {
     const token = crypto.randomBytes(32).toString("hex");
     this.pendingTokens.set(token, { userId: user.id, expiresAt: Date.now() + TOKEN_TTL_MS });
-
+    console.log(user, " este es el usuario miremos si tiene telefono o correo electronico");
     const verificationLink = `${process.env.APP_URL || "http://localhost:3000"}/api/verify?token=${token}`;
 
     const newEmailService = new EmailService();

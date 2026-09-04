@@ -11,22 +11,25 @@ const emailService = new EmailService();
 
 router.post("/users", async (req: Request, res: Response) => {
   try {
-    const { email, name, secondName, age, password } = req.body;
+    const { email, name, secondName, age, password, phone } = req.body;
+    console.log("Datos recibidos para registro:", { email, name, secondName, age, password, phone });
 
     if (!email || !name || !secondName || !age || !password) {
       return res.status(400).json({ error: "Faltan campos requeridos" });
     }
 
+
+
     if (!emailValidator.validate(email)) {
       return res.status(400).json({ error: "Formato de correo electrónico inválido" });
     }
-
     const result = await registerUserUseCase.execute({
       email,
       name,
       secondName,
       age: Number(age),
       password,
+      phone,
     });
 
     res.status(201).json({

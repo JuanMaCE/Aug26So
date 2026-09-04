@@ -42,6 +42,7 @@ export class MongoUserRepository implements UserRepository {
       secondName: doc.secondName,
       age: doc.age,
       password: doc.password,
+      number: doc.phone.toString()
     };
   }
 }

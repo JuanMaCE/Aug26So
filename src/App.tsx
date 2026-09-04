@@ -6,6 +6,7 @@ interface FormData {
   apellidos: string
   email: string
   edad: string
+  telefono: string
   password: string
 }
 
@@ -14,6 +15,7 @@ interface FormErrors {
   apellidos?: string
   email?: string
   edad?: string
+  telefono?: string
   password?: string
 }
 
@@ -29,6 +31,7 @@ function App() {
     apellidos: '',
     email: '',
     edad: '',
+    telefono: '',
     password: '',
   })
 
@@ -104,6 +107,7 @@ function App() {
       newErrors.edad = 'Ingresa una edad válida (1 - 120)'
     }
 
+
     // Password validation
     if (!formData.password) {
       newErrors.password = 'La contraseña es obligatoria'
@@ -137,7 +141,7 @@ function App() {
     }
 
     setIsSubmitting(true)
-
+    console.log(formData)
     try {
       const response = await fetch('/api/users', {
         method: 'POST',
@@ -149,6 +153,7 @@ function App() {
           secondName: formData.apellidos.trim(),
           email: formData.email.trim(),
           age: Number(formData.edad),
+          phone: formData.telefono.trim(),
           password: formData.password,
         }),
       })
@@ -223,6 +228,7 @@ function App() {
       apellidos: '',
       email: '',
       edad: '',
+      telefono: '',
       password: '',
     })
     setErrors({})
@@ -415,6 +421,41 @@ function App() {
                 )}
               </div>
 
+              {/* Teléfono */}
+              <div className="form-group">
+                <label htmlFor="telefono" className="form-label">
+                  Teléfono <span className="required-star">*</span>
+                </label>
+                <div className="input-wrapper">
+                  <span className="input-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />
+                    </svg>
+                  </span>
+                  <input
+                    id="telefono"
+                    name="telefono"
+                    type="tel"
+                    placeholder="Ej. 12345678"
+                    className={`input-control ${errors.telefono ? 'has-error' : ''}`}
+                    value={formData.telefono}
+                    onChange={handleChange}
+                    disabled={isSubmitting}
+                    autoComplete="tel"
+                  />
+                </div>
+                {errors.telefono && (
+                  <span className="error-message">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <circle cx="12" cy="12" r="10" />
+                      <line x1="12" y1="8" x2="12" y2="12" />
+                      <line x1="12" y1="16" x2="12.01" y2="16" />
+                    </svg>
+                    {errors.telefono}
+                  </span>
+                )}
+              </div>
+
               {/* Contraseña */}
               <div className="form-group">
                 <label htmlFor="password" className="form-label">
@@ -548,18 +589,17 @@ function App() {
                 {/* Email Preview Link if available (e.g. in test/dev mode with Ethereal) */}
                 {(emailStatus?.previewUrl || resendStatus?.previewUrl) && (
                   <div className="email-preview-action">
-                    <a
+                    
                       href={resendStatus?.previewUrl || emailStatus?.previewUrl || '#'}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="btn-preview-link"
-                    >
+                    
                       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
                         <circle cx="12" cy="12" r="3" />
                       </svg>
                       <span>Ver correo de prueba (Ethereal Preview) ↗</span>
-                    </a>
                   </div>
                 )}
               </div>
@@ -599,6 +639,10 @@ function App() {
               <div className="summary-row">
                 <span className="summary-label">Edad:</span>
                 <span className="summary-value">{registeredUser?.edad} años</span>
+              </div>
+              <div className="summary-row">
+                <span className="summary-label">Teléfono:</span>
+                <span className="summary-value">{registeredUser?.telefono}</span>
               </div>
               <div className="summary-row">
                 <span className="summary-label">Estado de correo:</span>
@@ -651,4 +695,3 @@ function App() {
 }
 
 export default App
-

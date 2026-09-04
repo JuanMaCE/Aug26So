@@ -10,7 +10,8 @@ export const users = mysqlTable("users", {
   name: varchar("name", { length: 100 }).notNull(),
   secondName: varchar("secondName", { length: 100}).notNull(),
   age: int("Age").notNull(),
-  password: varchar("password", {length: 250}).notNull()  
+  password: varchar("password", {length: 250}).notNull() ,
+  phone: varchar("phone", { length: 20 }),
 });
 
 

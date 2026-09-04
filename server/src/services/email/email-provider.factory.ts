@@ -15,7 +15,7 @@ export class EmailProviderFactory {
     process.env.SMTP_HOST || (process.env.SMTP_USER?.includes("@gmail.com") ? "smtp.gmail.com" : undefined);
     const user = process.env.SMTP_USER?.trim();
     const pass = process.env.SMTP_PASS?.trim();
-
+    console.log("credenciales", host, user, pass);
     if (host && user && pass) {
     const port = process.env.SMTP_PORT ? Number(process.env.SMTP_PORT) : host === "smtp.gmail.com" ? 465 : 587;
     const secure = process.env.SMTP_SECURE !== undefined ? process.env.SMTP_SECURE === "true" : port === 465;

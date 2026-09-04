@@ -30,6 +30,7 @@ export class DrizzleUserRepository implements UserRepository {
         secondName: row.secondName,
         age: row.age,
         password: row.password,
+        phone: String(row.phone),
         };
     }
 
